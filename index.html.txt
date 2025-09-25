@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>Your Name — Game Art</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="/styles.css"/>
+  </head>
+  <body>
+    <header class="nav">
+      <a class="brand" href="/">Your Name</a>
+      <nav>
+        <a href="/" class="active">Production</a>
+        <a href="/side-projects.html">Side Projects</a>
+        <a href="/about.html">About</a>
+        <a href="/resume.pdf" target="_blank" rel="noopener">Resume</a>
+      </nav>
+    </header>
+
+    <main id="grid" class="grid"></main>
+
+    <footer class="footer">
+      <p>© <span id="year"></span> Your Name</p>
+    </footer>
+
+    <script>
+      (async () => {
+        // Load portfolio items from a JSON manifest you’ll maintain in the repo.
+        const res = await fetch('/manifest.json');
+        const items = await res.json();
+
+        const grid = document.getElementById('grid');
+        grid.innerHTML = items
+          .filter(i => i.section === 'production')
+          .map(i => `
+            <a class="card" href="/project.html?slug=${encodeURIComponent(i.slug)}">
+              <img loading="lazy" alt="${i.title}"
+                src="${i.posterSrc}"
+                srcset="${i.posterSrcSet || ''}"
+                sizes="(max-width: 900px) 100vw, 33vw"/>
+              <div class="card-meta">
+                <h3>${i.title}</h3>
+                <p>${i.client || ''} ${i.year ? '· ' + i.year : ''}</p>
+              </div>
+            </a>
+          `).join('');
+        document.getElementById('year').textContent = new Date().getFullYear();
+      })();
+    </script>
+  </body>
+</html>
