@@ -1,0 +1,19 @@
+[
+  {
+    "slug": "forest-boss",
+    "section": "production",
+    "title": "Forest Boss",
+    "client": "Indie",
+    "year": 2025,
+    "posterSrc": "https://assets.yourdomain.com/posters/forest-boss-1024.jpg",
+    "posterSrcSet": "https://assets.yourdomain.com/posters/forest-boss-640.jpg 640w, https://assets.yourdomain.com/posters/forest-boss-1024.jpg 1024w, https://assets.yourdomain.com/posters/forest-boss-1600.jpg 1600w",
+    "heroFirstVideo": true,
+    "images": [
+      "https://assets.yourdomain.com/forest-boss/shot-01.jpg",
+      "https://assets.yourdomain.com/forest-boss/shot-02.jpg"
+    ],
+    "streamCustomerCode": "XXXXXX",
+    "streamIds": ["VIDEO_UID_1","VIDEO_UID_2"],
+    "description": "Boss battle art direction, VFX passes, and cinematic cameras."
+  }
+]

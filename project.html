@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Project — Your Name</title>
+  <link rel="stylesheet" href="/styles.css"/>
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="/">Your Name</a>
+    <nav>
+      <a href="/">Production</a>
+      <a href="/side-projects.html">Side Projects</a>
+      <a href="/about.html">About</a>
+    </nav>
+  </header>
+
+  <main class="project">
+    <div id="media"></div>
+    <article id="details"></article>
+  </main>
+
+  <script>
+    (async () => {
+      const slug = new URLSearchParams(location.search).get('slug');
+      const res = await fetch('/manifest.json');
+      const items = await res.json();
+      const item = items.find(i => i.slug === slug);
+      if (!item) { document.body.innerHTML = '<p>Not found.</p>'; return; }
+
+      // Text
+      document.title = item.title + ' — Your Name';
+      document.getElementById('details').innerHTML = `
+         <h1>${item.title}</h1>
+         <p class="subtle">${item.client || ''} ${item.year ? '· ' + item.year : ''}</p>
+         <p>${item.description || ''}</p>
+      `;
+
+      // Media
+      const m = document.getElementById('media');
+      const imgs = (item.images || []).map(src =>
+        `<img loading="lazy" class="hero" src="${src}" alt="${item.title}">`).join('');
+
+      // Prefer Cloudflare Stream for video playback.
+      const vids = (item.streamIds || []).map(id => `
+        <div class="video-embed">
+          <iframe
+            src="https://customer-${item.streamCustomerCode}.cloudflarestream.com/${id}/iframe"
+            allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+            allowfullscreen
+            loading="lazy"
+            style="border:0; width:100%; aspect-ratio:16/9;"></iframe>
+        </div>`).join('');
+
+      m.innerHTML = (item.heroFirstVideo ? vids + imgs : imgs + vids);
+    })();
+  </script>
+</body>
+</html>
