@@ -1,19 +1,22 @@
 [
   {
-    "slug": "forest-boss",
+    "slug": "bed_cover",
     "section": "production",
-    "title": "Forest Boss",
+    "title": "Bed Cover",
     "client": "Indie",
     "year": 2025,
-    "posterSrc": "https://assets.yourdomain.com/posters/forest-boss-1024.jpg",
-    "posterSrcSet": "https://assets.yourdomain.com/posters/forest-boss-640.jpg 640w, https://assets.yourdomain.com/posters/forest-boss-1024.jpg 1024w, https://assets.yourdomain.com/posters/forest-boss-1600.jpg 1600w",
-    "heroFirstVideo": true,
+
+    "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/1_bed_cover.png",
+
     "images": [
-      "https://assets.yourdomain.com/forest-boss/shot-01.jpg",
-      "https://assets.yourdomain.com/forest-boss/shot-02.jpg"
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/1_bed_cover.png",
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/1_bed_wireframe.png"
     ],
-    "streamCustomerCode": "XXXXXX",
-    "streamIds": ["VIDEO_UID_1","VIDEO_UID_2"],
-    "description": "Boss battle art direction, VFX passes, and cinematic cameras."
+
+    "videos": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/1_bed_turnaround.mp4"
+    ],
+
+    "description": "Texturing and look-dev study for a bed cover asset, with two stills and one short turntable video."
   }
 ]

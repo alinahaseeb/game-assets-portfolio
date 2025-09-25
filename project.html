@@ -22,39 +22,58 @@
   </main>
 
   <script>
-    (async () => {
-      const slug = new URLSearchParams(location.search).get('slug');
-      const res = await fetch('/manifest.json');
-      const items = await res.json();
-      const item = items.find(i => i.slug === slug);
-      if (!item) { document.body.innerHTML = '<p>Not found.</p>'; return; }
+  (async () => {
+    const slug = new URLSearchParams(location.search).get('slug');
+    const res  = await fetch('/manifest.json', { cache: 'no-store' });
+    const items = await res.json();
+    const item  = items.find(i => i.slug === slug);
 
-      // Text
-      document.title = item.title + ' — Your Name';
-      document.getElementById('details').innerHTML = `
-         <h1>${item.title}</h1>
-         <p class="subtle">${item.client || ''} ${item.year ? '· ' + item.year : ''}</p>
-         <p>${item.description || ''}</p>
-      `;
+    if (!item) {
+      document.body.innerHTML = '<main class="project"><p>Not found.</p></main>';
+      return;
+    }
 
-      // Media
-      const m = document.getElementById('media');
-      const imgs = (item.images || []).map(src =>
-        `<img loading="lazy" class="hero" src="${src}" alt="${item.title}">`).join('');
+    document.title = `${item.title} — Your Name`;
+    document.getElementById('details').innerHTML = `
+      <h1>${item.title}</h1>
+      <p class="subtle">${[item.client, item.year].filter(Boolean).join(' · ')}</p>
+      <p>${item.description || ''}</p>
+    `;
 
-      // Prefer Cloudflare Stream for video playback.
-      const vids = (item.streamIds || []).map(id => `
-        <div class="video-embed">
-          <iframe
-            src="https://customer-${item.streamCustomerCode}.cloudflarestream.com/${id}/iframe"
-            allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-            allowfullscreen
-            loading="lazy"
-            style="border:0; width:100%; aspect-ratio:16/9;"></iframe>
-        </div>`).join('');
+    const m = document.getElementById('media');
 
-      m.innerHTML = (item.heroFirstVideo ? vids + imgs : imgs + vids);
-    })();
-  </script>
+    // Helpers
+    const toVideoObj = (v) => typeof v === 'string' ? { src: v, type: 'video/mp4' } : v;
+    const renderVideo = ({ src, type = 'video/mp4', poster }) => `
+      <div class="video-embed">
+        <video controls preload="metadata"
+               ${poster ? `poster="${poster}"` : ''}
+               playsinline
+               style="width:100%;aspect-ratio:16/9;display:block;border-radius:14px;background:#000;">
+          <source src="${src}" type="${type}">
+          Sorry, your browser doesn’t support embedded video.
+        </video>
+      </div>
+    `;
+
+    // Build media HTML
+    const imgs = (item.images || []).map(src =>
+      `<img loading="lazy" class="hero" src="${src}" alt="${item.title}">`).join('');
+
+    const vids = (item.videos || []).map(v => renderVideo(toVideoObj(v))).join('');
+
+    // If there are no images but there is a posterSrc, show it as a hero image
+    const posterFallback = (!imgs && item.posterSrc)
+      ? `<img loading="lazy" class="hero" src="${item.posterSrc}" alt="${item.title}">`
+      : '';
+
+    // Order: images then videos (or flip if heroFirstVideo = true)
+    const mediaHtml = item.heroFirstVideo
+      ? (vids + (imgs || posterFallback))
+      : ((imgs || posterFallback) + vids);
+
+    m.innerHTML = mediaHtml || '<p class="subtle">No media yet.</p>';
+  })();
+</script>
 </body>
 </html>
