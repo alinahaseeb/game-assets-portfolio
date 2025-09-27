@@ -89,3 +89,17 @@ html, body { height:100%; margin:0; background:var(--bg); color:var(--fg); font:
 
 /* Meta (hidden now) */
 .card-meta { display:none; }
+
+/* iOS Safari fallback: use grid instead of columns */
+@supports (-webkit-touch-callout: none) {
+  .masonry {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-gap: 1rem;
+    padding: 1.25rem;
+  }
+  .card {
+    display: block;
+    margin: 0;
+  }
+}
