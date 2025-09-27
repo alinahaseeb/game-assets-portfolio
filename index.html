@@ -2,62 +2,72 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>Your Name — Game Art</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Your Name — Game Assets</title>
     <link rel="stylesheet" href="/styles.css"/>
   </head>
-  <body>
-    <header class="nav">
-      <a class="brand" href="/">Your Name</a>
-      <nav>
-        <a href="/" class="active">Production</a>
-        <a href="/side-projects.html">Side Projects</a>
-        <a href="/about.html">About</a>
-        <a href="/resume.pdf" target="_blank" rel="noopener">Resume</a>
-      </nav>
-    </header>
+  <body class="layout">
+    <!-- Left, fixed: 25% width -->
+    <aside class="sidebar">
+      <div class="brand">Your Name</div>
+      <nav id="asset-list" class="asset-list"></nav>
+      <div class="sidebar-footer">© <span id="year"></span></div>
+    </aside>
 
-    <main id="grid" class="grid"></main>
-
-    <footer class="footer">
-      <p>© <span id="year"></span> Your Name</p>
-    </footer>
+    <!-- Right, scrolls: masonry grid -->
+    <main class="gallery">
+      <div id="grid" class="masonry"></div>
+    </main>
 
     <script>
       (async () => {
         const res = await fetch('/manifest.json', { cache: 'no-store' });
-        const items = (await res.json()).filter(i => i.section === 'production');
+        const items = await res.json();
 
-        const isVideo = (url) => /\.mp4(\?|$)/i.test(url || '');
-        const grid = document.getElementById('grid');
-
-        grid.innerHTML = items.map(i => {
-          const media = isVideo(i.posterSrc)
-            ? `
-              <video class="card-video" muted preload="metadata" playsinline
-                    onmouseenter="this.currentTime=0; this.play()"
-                    onmouseleave="this.pause(); this.currentTime=0;">
-                <source src="${i.posterSrc}" type="video/mp4">
-              </video>`
-            : `<img loading="lazy" alt="${i.title}" src="${i.posterSrc}">`;
-
-          return `
-            <a class="card" href="/project.html?slug=${encodeURIComponent(i.slug)}">
-              ${media}
-              <div class="card-meta">
-                <h3>${i.title}</h3>
-                <p>${[i.client,i.year].filter(Boolean).join(' · ')}</p>
-              </div>
-            </a>`;
-        }).join('');
-
-        // Optional: cap preview to 5s while hovering
-        grid.querySelectorAll('.card-video').forEach(v => {
-          v.addEventListener('timeupdate', () => { if (v.currentTime >= 5) v.pause(); }, { passive:true });
+        // === Sidebar: asset links (sorted by numeric prefix if present) ===
+        const withIndex = items.map(i => {
+          const m = i.posterSrc?.match(/(^|\/)(\d+)_/i) || i.images?.[0]?.match(/(^|\/)(\d+)_/i) || [];
+          return { i, n: m[2] ? parseInt(m[2], 10) : Number.MAX_SAFE_INTEGER };
         });
+        withIndex.sort((a,b) => a.n - b.n);
+        const list = document.getElementById('asset-list');
+        list.innerHTML = withIndex.map(({i}) =>
+          `<a class="asset-link" href="/project.html?slug=${encodeURIComponent(i.slug)}">${i.title || i.slug}</a>`
+        ).join('');
+
+        // === Grid: masonry cards (3 cols) ===
+        const isVideo = (url) => /\.mp4(\?|$)/i.test(url || '');
+
+        const grid = document.getElementById('grid');
+        grid.innerHTML = items
+          .filter(i => i.section === 'production')
+          .map(i => {
+            const media = isVideo(i.posterSrc)
+              ? `
+                <video class="card-media" muted preload="metadata" playsinline
+                       onmouseenter="this.currentTime=0; this.play()"
+                       onmouseleave="this.pause(); this.currentTime=0;">
+                  <source src="${i.posterSrc}" type="video/mp4">
+                </video>`
+              : `<img class="card-media" loading="lazy" alt="${i.title}" src="${i.posterSrc || (i.images?.[0]||'')}" />`;
+
+            return `
+              <a class="card" href="/project.html?slug=${encodeURIComponent(i.slug)}" title="${i.title || i.slug}">
+                ${media}
+                <div class="card-meta">
+                  <h3>${i.title || i.slug}</h3>
+                  <p>${[i.client,i.year].filter(Boolean).join(' · ')}</p>
+                </div>
+              </a>`;
+          }).join('');
+
+        // cap video previews to first 5s
+        grid.querySelectorAll('.card video').forEach(v => {
+          v.addEventListener('timeupdate', () => { if (v.currentTime >= 5) v.pause(); }, { passive: true });
+        });
+
+        document.getElementById('year').textContent = new Date().getFullYear();
       })();
     </script>
-
   </body>
 </html>
