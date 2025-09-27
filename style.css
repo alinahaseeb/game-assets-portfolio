@@ -1,4 +1,9 @@
-:root { --bg:#0e0e0f; --fg:#eaeaea; --muted:#a0a0a0; --card:#161618; }
+:root { 
+  --bg:#ffffff;    /* white background */
+  --fg:#000000;    /* black text */
+  --muted:#666666; /* muted grey */
+  --card:#ffffff;  /* cards blend with background */
+}
 * { box-sizing: border-box; }
 html, body { height:100%; margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
 
@@ -9,18 +14,18 @@ html, body { height:100%; margin:0; background:var(--bg); color:var(--fg); font:
   width:25vw; min-width:260px; max-width:520px;
   padding:1.25rem 1.25rem 1rem;
   display:flex; flex-direction:column; gap:1rem;
-  border-right:1px solid #222;
+  border-right:1px solid #ddd; /* lighter divider for white theme */
 }
 .brand { font-weight:700; letter-spacing:.2px; font-size:1.1rem; }
 .asset-list { display:flex; flex-direction:column; gap:.4rem; }
 .asset-link { color:var(--fg); text-decoration:none; opacity:.85; padding:.35rem .25rem; border-radius:.5rem; }
-.asset-link:hover { opacity:1; background:#1b1b1d; }
+.asset-link:hover { opacity:1; background:#f2f2f2; }
 .sidebar-footer { margin-top:auto; color:var(--muted); font-size:.9rem; opacity:.8; }
 
 /* Only the grid scrolls */
 .gallery { flex:1; height:100vh; overflow-y:auto; }
 .gallery::-webkit-scrollbar { width:10px; }
-.gallery::-webkit-scrollbar-thumb { background:#2a2a2e; border-radius:10px; }
+.gallery::-webkit-scrollbar-thumb { background:#ccc; border-radius:10px; }
 
 /* === Masonry (columns) — prevents same-height rows === */
 .masonry{
@@ -33,7 +38,7 @@ html, body { height:100%; margin:0; background:var(--bg); color:var(--fg); font:
 @media (max-width:1100px){ .sidebar{ width:28vw; } .masonry{ column-count:2; } }
 @media (max-width:720px){
   .layout{ flex-direction:column; }
-  .sidebar{ width:100%; border-right:none; border-bottom:1px solid #222; }
+  .sidebar{ width:100%; border-right:none; border-bottom:1px solid #ddd; }
   .gallery{ height:calc(100vh - 140px); }
   .masonry{ column-count:1; padding:1rem; }
 }
@@ -43,19 +48,19 @@ html, body { height:100%; margin:0; background:var(--bg); color:var(--fg); font:
   display:inline-block;     /* critical for column layouts */
   width:100%;
   margin:0 0 1rem;          /* vertical spacing between cards */
-  background:var(--card);
+  background:transparent;   /* only media shows */
   border-radius:16px;
   color:inherit;
   text-decoration:none;
   break-inside:avoid;       /* don't split across columns */
   page-break-inside:avoid;
   -webkit-column-break-inside:avoid;
-  box-shadow:0 1px 0 rgba(255,255,255,0.04), 0 12px 30px rgba(0,0,0,0.25);
+  box-shadow:none;          /* no shadow for clean gallery look */
 }
 
 /* Media wrapper preserves rounded corners without clipping card height */
 .card-media-wrap{
-  border-radius:16px 16px 0 0;
+  border-radius:16px;
   overflow:hidden;
 }
 
@@ -64,10 +69,8 @@ html, body { height:100%; margin:0; background:var(--bg); color:var(--fg); font:
   width:100%;
   height:auto;              /* let intrinsic size drive height */
   object-fit:cover;         /* use 'contain' if you never want cropping */
-  background:#000;
+  background:#fff;          /* fallback for transparency */
 }
 
-/* Meta */
-.card-meta { padding:.75rem .9rem; }
-.card-meta h3 { margin:.1rem 0 .2rem; font-size:1.05rem; }
-.card-meta p  { margin:0; color:var(--muted); font-size:.9rem; }
+/* Meta (hidden now) */
+.card-meta { display:none; }

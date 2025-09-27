@@ -60,10 +60,6 @@
             return `
               <a class="card" href="/project.html?slug=${encodeURIComponent(i.slug)}" title="${i.title || i.slug}">
                 ${media}
-                <div class="card-meta">
-                  <h3>${i.title || i.slug}</h3>
-                  <p>${[i.client,i.year].filter(Boolean).join(' · ')}</p>
-                </div>
               </a>`;
           }).join('');
 
