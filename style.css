@@ -25,11 +25,13 @@ html, body { height:100%; margin:0; background:var(--bg); color:var(--fg); font:
 /* Default: true CSS Grid masonry */
 .masonry {
   display:grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   grid-auto-flow: row dense;
   grid-template-rows: masonry;
   gap:1rem;
   padding:1.25rem;
+  max-width: 1200px; /* 3 cols * 400px-ish */
+  margin: 0 auto;
 }
 
 /* Safari fallback: use CSS columns when masonry isn’t supported */
