@@ -63,9 +63,23 @@
               </a>`;
           }).join('');
 
-        // Cap hover previews to 5s
+        // === Add preview controls ===
         grid.querySelectorAll('video.card-media').forEach(v => {
-          v.addEventListener('timeupdate', () => { if (v.currentTime >= 5) v.pause(); }, { passive:true });
+          // Stop after 5s
+          v.addEventListener('timeupdate', () => {
+            if (v.currentTime >= 5) v.pause();
+          }, { passive:true });
+
+          // Mobile: tap + hold (touchstart)
+          v.addEventListener('touchstart', () => {
+            v.currentTime = 0;
+            v.play();
+          }, { passive:true });
+
+          // Release finger or cancel scroll → pause + reset
+          const stop = () => { v.pause(); v.currentTime = 0; };
+          v.addEventListener('touchend', stop, { passive:true });
+          v.addEventListener('touchcancel', stop, { passive:true });
         });
 
         document.getElementById('year').textContent = new Date().getFullYear();
