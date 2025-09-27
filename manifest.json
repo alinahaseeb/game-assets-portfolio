@@ -1,22 +1,298 @@
 [
   {
-    "slug": "bed_cover",
+    "slug": "bed",
     "section": "production",
-    "title": "Bed Cover",
+    "title": "Bed",
     "client": "Indie",
     "year": 2025,
-
-    "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/1_bed_cover.png",
-
+    "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/1_bed_turnaround.mp4",
     "images": [
       "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/1_bed_cover.png",
       "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/1_bed_wireframe.png"
     ],
-
     "videos": [
       "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/1_bed_turnaround.mp4"
     ],
-
-    "description": "Texturing and look-dev study for a bed cover asset, with two stills and one short turntable video."
+    "description": ""
+  },
+  {
+    "slug": "dock",
+    "section": "production",
+    "title": "Dock",
+    "client": "Indie",
+    "year": 2025,
+    "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/2_dock_turnaround.mp4",
+    "images": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/2_dock_cover.png",
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/2_dock_wireframe.png",
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/2_dock_UVs.png"
+    ],
+    "videos": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/2_dock_turnaround.mp4"
+    ],
+    "description": ""
+  },
+  {
+    "slug": "dragonfountain",
+    "section": "production",
+    "title": "Dragonfountain",
+    "client": "Indie",
+    "year": 2025,
+    "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/3_dragonfountain_turnaround.mp4",
+    "images": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/3_dragonfountain_cover.png",
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/3_dragonfountain_turnaround.png"
+    ],
+    "videos": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/3_dragonfountain_turnaround.mp4"
+    ],
+    "description": ""
+  },
+  {
+    "slug": "firepit",
+    "section": "production",
+    "title": "Firepit",
+    "client": "Indie",
+    "year": 2025,
+    "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/4_firepit_turnaround.mp4",
+    "images": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/4_firepit_cover.png",
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/4_firepit_wireframe.png",
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/4_firepit_UVs.png"
+    ],
+    "videos": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/4_firepit_turnaround.mp4"
+    ],
+    "description": ""
+  },
+  {
+    "slug": "furniture",
+    "section": "production",
+    "title": "Furniture",
+    "client": "Indie",
+    "year": 2025,
+    "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/5_furniture_turnaround.mp4",
+    "images": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/5_furniture_cover.png",
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/5_furniture_wireframe.png"
+    ],
+    "videos": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/5_furniture_turnaround.mp4"
+    ],
+    "description": ""
+  },
+  {
+    "slug": "gardenassets",
+    "section": "production",
+    "title": "Gardenassets",
+    "client": "Indie",
+    "year": 2025,
+    "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/6_gardenassets_turnaround.mp4",
+    "images": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/6_gardenassets_cover.png"
+    ],
+    "videos": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/6_gardenassets_turnaround.mp4"
+    ],
+    "description": ""
+  },
+  {
+    "slug": "goblinhouse",
+    "section": "production",
+    "title": "Goblinhouse",
+    "client": "Indie",
+    "year": 2025,
+    "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/7_goblinhouse_turnaround.mp4",
+    "images": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/7_goblinhouse_cover.png",
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/7_goblinhouse_wireframe.png"
+    ],
+    "videos": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/7_goblinhouse_turnaround.mp4"
+    ],
+    "description": ""
+  },
+  {
+    "slug": "oceancutout",
+    "section": "production",
+    "title": "Oceancutout",
+    "client": "Indie",
+    "year": 2025,
+    "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/8_oceancutout_turnaround.mp4",
+    "images": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/8_oceancutout_cover.png"
+    ],
+    "videos": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/8_oceancutout_turnaround.mp4"
+    ],
+    "description": ""
+  },
+  {
+    "slug": "potions",
+    "section": "production",
+    "title": "Potions",
+    "client": "Indie",
+    "year": 2025,
+    "posterSrc": null,
+    "images": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/9_potions_cover.png",
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/9_potions_wireframe.png"
+    ],
+    "videos": [],
+    "description": ""
+  },
+  {
+    "slug": "reel",
+    "section": "production",
+    "title": "Reel",
+    "client": "Indie",
+    "year": 2025,
+    "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/10_reel_turnaround.mp4",
+    "images": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/10_reel_cover.png"
+    ],
+    "videos": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/10_reel_turnaround.mp4"
+    ],
+    "description": ""
+  },
+  {
+    "slug": "volcano",
+    "section": "production",
+    "title": "Volcano",
+    "client": "Indie",
+    "year": 2025,
+    "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/11_%20volcano_turnaround.mp4",
+    "images": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/11_volcano_cover.png"
+    ],
+    "videos": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/11_%20volcano_turnaround.mp4"
+    ],
+    "description": ""
+  },
+  {
+    "slug": "waterfall",
+    "section": "production",
+    "title": "Waterfall",
+    "client": "Indie",
+    "year": 2025,
+    "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/12_waterfall_turnaround.mp4",
+    "images": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/12_waterfall_cover.png"
+    ],
+    "videos": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/12_waterfall_turnaround.mp4"
+    ],
+    "description": ""
+  },
+  {
+    "slug": "orc",
+    "section": "production",
+    "title": "Orc",
+    "client": "Indie",
+    "year": 2025,
+    "posterSrc": null,
+    "images": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/13_orc_cover.png",
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/13_orc_wireframe.png"
+    ],
+    "videos": [],
+    "description": ""
+  },
+  {
+    "slug": "sack",
+    "section": "production",
+    "title": "Sack",
+    "client": "Indie",
+    "year": 2025,
+    "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/14_sack_turnaround.mp4",
+    "images": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/14_sack_cover.png",
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/14_sack_wireframe.png",
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/14_sack_UVs.png"
+    ],
+    "videos": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/14_sack_turnaround.mp4"
+    ],
+    "description": ""
+  },
+  {
+    "slug": "tropicaltrees",
+    "section": "production",
+    "title": "Tropicaltrees",
+    "client": "Indie",
+    "year": 2025,
+    "posterSrc": null,
+    "images": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/14_tropicaltrees_cover.png"
+    ],
+    "videos": [],
+    "description": ""
+  },
+  {
+    "slug": "15",
+    "section": "production",
+    "title": "15",
+    "client": "Indie",
+    "year": 2025,
+    "posterSrc": null,
+    "images": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/15.png"
+    ],
+    "videos": [],
+    "description": ""
+  },
+  {
+    "slug": "16",
+    "section": "production",
+    "title": "16",
+    "client": "Indie",
+    "year": 2025,
+    "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/16.mp4",
+    "images": [],
+    "videos": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/16.mp4"
+    ],
+    "description": ""
+  },
+  {
+    "slug": "17",
+    "section": "production",
+    "title": "17",
+    "client": "Indie",
+    "year": 2025,
+    "posterSrc": null,
+    "images": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/17.png"
+    ],
+    "videos": [],
+    "description": ""
+  },
+  {
+    "slug": "18",
+    "section": "production",
+    "title": "18",
+    "client": "Indie",
+    "year": 2025,
+    "posterSrc": null,
+    "images": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/18.png"
+    ],
+    "videos": [],
+    "description": ""
+  },
+  {
+    "slug": "19",
+    "section": "production",
+    "title": "19",
+    "client": "Indie",
+    "year": 2025,
+    "posterSrc": null,
+    "images": [
+      "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/19.png"
+    ],
+    "videos": [],
+    "description": ""
   }
 ]

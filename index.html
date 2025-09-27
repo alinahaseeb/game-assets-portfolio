@@ -26,27 +26,38 @@
 
     <script>
       (async () => {
-        // Load portfolio items from a JSON manifest you’ll maintain in the repo.
-        const res = await fetch('/manifest.json');
-        const items = await res.json();
+        const res = await fetch('/manifest.json', { cache: 'no-store' });
+        const items = (await res.json()).filter(i => i.section === 'production');
 
+        const isVideo = (url) => /\.mp4(\?|$)/i.test(url || '');
         const grid = document.getElementById('grid');
-        grid.innerHTML = items
-          .filter(i => i.section === 'production')
-          .map(i => `
+
+        grid.innerHTML = items.map(i => {
+          const media = isVideo(i.posterSrc)
+            ? `
+              <video class="card-video" muted preload="metadata" playsinline
+                    onmouseenter="this.currentTime=0; this.play()"
+                    onmouseleave="this.pause(); this.currentTime=0;">
+                <source src="${i.posterSrc}" type="video/mp4">
+              </video>`
+            : `<img loading="lazy" alt="${i.title}" src="${i.posterSrc}">`;
+
+          return `
             <a class="card" href="/project.html?slug=${encodeURIComponent(i.slug)}">
-              <img loading="lazy" alt="${i.title}"
-                src="${i.posterSrc}"
-                srcset="${i.posterSrcSet || ''}"
-                sizes="(max-width: 900px) 100vw, 33vw"/>
+              ${media}
               <div class="card-meta">
                 <h3>${i.title}</h3>
-                <p>${i.client || ''} ${i.year ? '· ' + i.year : ''}</p>
+                <p>${[i.client,i.year].filter(Boolean).join(' · ')}</p>
               </div>
-            </a>
-          `).join('');
-        document.getElementById('year').textContent = new Date().getFullYear();
+            </a>`;
+        }).join('');
+
+        // Optional: cap preview to 5s while hovering
+        grid.querySelectorAll('.card-video').forEach(v => {
+          v.addEventListener('timeupdate', () => { if (v.currentTime >= 5) v.pause(); }, { passive:true });
+        });
       })();
     </script>
+
   </body>
 </html>
