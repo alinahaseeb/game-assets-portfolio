@@ -46,12 +46,16 @@
           .map(i => {
             const poster = i.posterSrc || (i.images?.[0] || '');
             const media = isVideo(poster)
-              ? `<video class="card-media" muted preload="metadata" playsinline
-                      onmouseenter="this.currentTime=0; this.play()"
-                      onmouseleave="this.pause(); this.currentTime=0;">
-                   <source src="${poster}" type="video/mp4">
-                 </video>`
-              : `<img class="card-media" loading="lazy" alt="${i.title}" src="${poster}">`;
+              ? `<div class="card-media-wrap">
+                  <video class="card-media" muted preload="metadata" playsinline
+                          onmouseenter="this.currentTime=0; this.play()"
+                          onmouseleave="this.pause(); this.currentTime=0;">
+                    <source src="${poster}" type="video/mp4">
+                  </video>
+                </div>`
+              : `<div class="card-media-wrap">
+                  <img class="card-media" loading="lazy" alt="${i.title}" src="${poster}">
+                </div>`;
 
             return `
               <a class="card" href="/project.html?slug=${encodeURIComponent(i.slug)}" title="${i.title || i.slug}">

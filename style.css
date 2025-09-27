@@ -62,7 +62,6 @@ html, body { height:100%; margin:0; background:var(--bg); color:var(--fg); font:
   width:100%;
   background:var(--card);
   border-radius:16px;
-  overflow:hidden;
   color:inherit;
   text-decoration:none;
   break-inside:avoid;
@@ -71,8 +70,13 @@ html, body { height:100%; margin:0; background:var(--bg); color:var(--fg); font:
   box-shadow:0 1px 0 rgba(255,255,255,0.04), 0 12px 30px rgba(0,0,0,0.25);
 }
 
-.card-media { width:100%; display:block; height:auto; object-fit:cover; background:#000; }
-video.card-media { aspect-ratio:16/9; } /* keep video cards tidy */
+.card-media {
+  display:block;
+  width:100%;
+  height:auto;         /* critical: let intrinsic ratio set height */
+  object-fit:cover;    /* looks good for thumbs; switch to 'contain' if you prefer no cropping */
+  background:#000;
+}
 
 .card-meta { padding:.75rem .9rem; }
 .card-meta h3 { margin:.1rem 0 .2rem; font-size:1.05rem; }
