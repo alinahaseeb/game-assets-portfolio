@@ -30,37 +30,52 @@
         const gallery = document.querySelector('.gallery');
         const isVideo = url => /\.mp4(\?|$)/i.test(url || '');
 
-        // --- helper: draw a first-frame poster for videos with no poster ---
-        function paintFirstFrameAsPoster(v) {
-          // Skip if poster was already set (by us or the markup)
-          if (v.getAttribute('poster')) return;
+        // --- iOS WebKit detection (Chrome/Firefox/Edge on iOS all use WebKit) ---
+        const ua = navigator.userAgent || '';
+        const isIOS = /\b(iPad|iPhone|iPod)\b/i.test(ua) || (/\bMacintosh\b/.test(ua) && 'ontouchend' in document);
+        
+        // --- Helper: extract numeric prefix from a file/url like "10_foo.mp4" ---
+        const num = (s) => (s?.match(/(?:^|\/)(\d+)_/) || [,''])[1] || '';
 
-          const seekTo = 0.2; // a tiny bit past 0 is more reliable
-          const onLoaded = () => {
-            // Some iOS builds throw if you set currentTime too early
-            try { v.currentTime = seekTo; } catch {}
-          };
+        // --- Build thumbnail map from your uploaded file names ---
+        const THUMB_BASE = (items[0]?.posterSrc || '').replace(/\/[^\/]+$/, ''); // folder of first posterSrc
+        const THUMB_FILES = [
+          "10_dragonfountain_thumbnail.png",
+          "11_tundratrees_thumbnail.png",
+          "12_goblinhouse_thumbnail.png",
+          "13_dock_thumbnail.png",
+          "14_room_thumbnail.png",
+          "15_volcano_thumbnail.png",
+          "1_potion_thumbnail.png",
+          "2_potion_thumbnail.png",
+          "3_furnitureassets_thumbnail.png",
+          "4_oceancutout_thumbnail.png",
+          "5_jungletrees_thumbnail.png",
+          "6_orc_thumbnail.png",
+          "7_gardenassets_thumbnail.png",
+          "8_waterfall_thumbnail.png",
+          "9_bed_thumbnail.png"
+        ];
+        const THUMBS = THUMB_FILES.reduce((m, f) => { m[f.split('_')[0]] = `${THUMB_BASE}/${f}`; return m; }, {});
+
+        // --- Optional: poster painting fallback if no thumbnail exists ---
+        function paintFirstFrameAsPoster(v) {
+          if (v.getAttribute('poster')) return;
+          const seekTo = 0.2;
+          const onLoaded = () => { try { v.currentTime = seekTo; } catch {} };
           const onSeeked = () => {
             try {
               const w = v.videoWidth || 1280, h = v.videoHeight || 720;
-              const canvas = document.createElement('canvas');
-              canvas.width = w; canvas.height = h;
-              const ctx = canvas.getContext('2d');
-              ctx.drawImage(v, 0, 0, w, h);
-              const dataURL = canvas.toDataURL('image/jpeg', 0.75);
-              v.setAttribute('poster', dataURL);
-            } catch (err) {
-              // If CORS blocks drawing, just ignore; video will still play on touch/hover
-              // console.warn('Poster paint failed:', err);
-            } finally {
-              // Reset so hover/touch previews start from the beginning
-              try { v.currentTime = 0; } catch {}
-              v.removeEventListener('loadedmetadata', onLoaded);
-              v.removeEventListener('seeked', onSeeked);
-            }
+              const c = document.createElement('canvas'); c.width = w; c.height = h;
+              c.getContext('2d').drawImage(v, 0, 0, w, h);
+              v.setAttribute('poster', c.toDataURL('image/jpeg', 0.75));
+            } catch {}
+            try { v.currentTime = 0; } catch {}
+            v.removeEventListener('loadedmetadata', onLoaded);
+            v.removeEventListener('seeked', onSeeked);
           };
-          v.addEventListener('loadedmetadata', onLoaded, { once: true });
-          v.addEventListener('seeked', onSeeked, { once: true });
+          v.addEventListener('loadedmetadata', onLoaded, { once:true });
+          v.addEventListener('seeked', onSeeked, { once:true });
         }
 
         // ----- Sidebar list (sorted by numeric prefix if present)
@@ -74,7 +89,7 @@
           `<a class="asset-link" data-slug="${i.slug}" href="/project.html?slug=${encodeURIComponent(i.slug)}">${i.title || i.slug}</a>`
         ).join('');
 
-        // ----- Render grid (default view)
+        // ----- Render grid (default view) — iOS uses PNG thumb; others use video
         function renderGrid() {
           gallery.innerHTML = `<div id="grid" class="masonry"></div>`;
           const g = document.getElementById('grid');
@@ -83,17 +98,25 @@
             .filter(i => i.section === 'production')
             .map(i => {
               const poster = i.posterSrc || (i.images?.[0] || '');
-              const media = isVideo(poster)
+              const n = num(poster) || num(i.images?.[0] || '') || num(i.slug);
+              const thumb = THUMBS[n];
+
+              // On iOS: render IMG thumbnail for instant paint; else: video preview
+              const media = (isIOS && thumb)
                 ? `<div class="card-media-wrap">
-                    <video class="card-media" muted preload="metadata" playsinline autoplay
-                            onmouseenter="this.currentTime=0; this.play()"
-                            onmouseleave="this.pause(); this.currentTime=0;">
-                      <source src="${poster}" type="video/mp4">
-                    </video>
+                    <img class="card-media" loading="lazy" alt="${i.title}" src="${thumb}">
                   </div>`
-                : `<div class="card-media-wrap">
-                    <img class="card-media" loading="lazy" alt="${i.title}" src="${poster}">
-                  </div>`;
+                : isVideo(poster)
+                  ? `<div class="card-media-wrap">
+                      <video class="card-media" muted preload="metadata" playsinline autoplay
+                              onmouseenter="this.currentTime=0; this.play()"
+                              onmouseleave="this.pause(); this.currentTime=0;">
+                        <source src="${poster}" type="video/mp4">
+                      </video>
+                    </div>`
+                  : `<div class="card-media-wrap">
+                      <img class="card-media" loading="lazy" alt="${i.title}" src="${poster}">
+                    </div>`;
 
               return `
                 <a class="card" data-slug="${i.slug}" href="/project.html?slug=${encodeURIComponent(i.slug)}" title="${i.title || i.slug}">
@@ -101,11 +124,9 @@
                 </a>`;
             }).join('');
 
-          // preview controls (hover + touch) + poster painting
+          // preview controls (hover + touch) + poster painting for non-iOS videos
           g.querySelectorAll('video.card-media').forEach(v => {
-            // iOS/WebKit: paint a poster bitmap if not provided
-            paintFirstFrameAsPoster(v);
-
+            if (!isIOS) paintFirstFrameAsPoster(v);
             v.addEventListener('timeupdate', () => { if (v.currentTime >= 5) v.pause(); }, { passive:true });
             v.addEventListener('touchstart', () => { v.currentTime = 0; v.play(); }, { passive:true });
             const stop = () => { v.pause(); v.currentTime = 0; };
@@ -119,11 +140,13 @@
           const item = bySlug[slug];
           if (!item) { renderGrid(); return; }
 
-          // poster first, then secondary media (dedup if poster also in videos)
           const poster = item.posterSrc ? [item.posterSrc] : [];
           const imgs = item.images || [];
           const vids = (item.videos || []).filter(v => v !== item.posterSrc);
           const mediaOrder = [...poster, ...imgs, ...vids];
+
+          const n = num(item.posterSrc || item.images?.[0] || '');
+          const thumb = THUMBS[n];
 
           gallery.innerHTML = `
             <section class="detail" data-slug="${slug}">
@@ -138,7 +161,7 @@
                 ${mediaOrder.map(src => `
                   <div class="frame">
                     ${isVideo(src)
-                      ? `<video controls preload="metadata" playsinline>
+                      ? `<video controls preload="metadata" playsinline ${thumb ? `poster="${thumb}"` : ""}>
                           <source src="${src}" type="video/mp4">
                         </video>`
                       : `<img loading="lazy" src="${src}" alt="${item.title || item.slug}">`
@@ -149,16 +172,16 @@
             </section>
           `;
 
-          // Back button
           gallery.querySelector('.detail-back').addEventListener('click', () => {
             if (history.state && history.state.slug) history.back();
             else renderGrid(), history.replaceState(null, '', '/');
           });
 
-          // Paint posters for any detail videos that lack one
-          gallery.querySelectorAll('.detail video').forEach(paintFirstFrameAsPoster);
+          // For non-iOS or when no thumb exists, try painting a poster dynamically
+          gallery.querySelectorAll('.detail video').forEach(v => {
+            if (!thumb) paintFirstFrameAsPoster(v);
+          });
 
-          // push URL (?slug=) so refresh/back works
           if (push) {
             const url = `/?slug=${encodeURIComponent(slug)}`;
             history.pushState({ slug }, '', url);
@@ -170,28 +193,24 @@
         function openFromEvent(e) {
           const a = e.target.closest('a[data-slug]');
           if (!a) return;
-          const slug = a.getAttribute('data-slug');
-          e.preventDefault(); // SPA
-          renderDetail(slug, true);
+          e.preventDefault();
+          renderDetail(a.getAttribute('data-slug'), true);
         }
-
         document.body.addEventListener('click', openFromEvent);
 
         window.addEventListener('popstate', (ev) => {
           const slug = ev.state?.slug || new URLSearchParams(location.search).get('slug');
-          if (slug && bySlug[slug]) renderDetail(slug, /*push*/ false);
+          if (slug && bySlug[slug]) renderDetail(slug, false);
           else { renderGrid(); document.title = 'Game Assets'; }
         });
 
         // Initial route
         const initialSlug = new URLSearchParams(location.search).get('slug');
-        if (initialSlug && bySlug[initialSlug]) renderDetail(initialSlug, /*push*/ false);
+        if (initialSlug && bySlug[initialSlug]) renderDetail(initialSlug, false);
         else renderGrid();
 
-        // Footer year
         document.getElementById('year').textContent = new Date().getFullYear();
       })();
     </script>
-
   </body>
 </html>
