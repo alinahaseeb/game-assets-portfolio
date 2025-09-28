@@ -3,14 +3,16 @@
   <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>Your Name — Game Assets</title>
+    <title>Alina Haseeb — Game Assets</title>
     <!-- cache-bust the stylesheet -->
     <link rel="stylesheet" href="/style.css?v=2"/>
   </head>
   <body class="layout">
     <!-- Fixed left: 25% width -->
     <aside class="sidebar">
-      <div class="brand">Your Name</div>
+      <h1>
+        <div class="brand">Alina Haseeb</div>
+      </h1>
       <nav id="asset-list" class="asset-list"></nav>
       <div class="sidebar-footer">© <span id="year"></span></div>
     </aside>
@@ -21,69 +23,142 @@
     </main>
 
     <script>
-      (async () => {
-        const res = await fetch('/manifest.json', { cache: 'no-store' });
-        const items = await res.json();
+(async () => {
+  const res = await fetch('/manifest.json', { cache: 'no-store' });
+  const items = await res.json();
+  const bySlug = Object.fromEntries(items.map(i => [i.slug, i]));
 
-        // Sidebar list (sorted by numeric prefix if present)
-        const withIndex = items.map(i => {
-          const src = i.posterSrc || i.images?.[0] || '';
-          const m = src.match(/(?:^|\/)(\d+)_/);
-          return { i, n: m ? parseInt(m[1], 10) : Number.MAX_SAFE_INTEGER };
-        }).sort((a,b) => a.n - b.n);
+  const list = document.getElementById('asset-list');
+  const grid = document.getElementById('grid');
+  const gallery = document.querySelector('.gallery');
 
-        const list = document.getElementById('asset-list');
-        list.innerHTML = withIndex.map(({i}) =>
-          `<a class="asset-link" href="/project.html?slug=${encodeURIComponent(i.slug)}">${i.title || i.slug}</a>`
-        ).join('');
+  const isVideo = url => /\.mp4(\?|$)/i.test(url || '');
 
-        // Grid cards
-        const isVideo = url => /\.mp4(\?|$)/i.test(url || '');
-        const grid = document.getElementById('grid');
+  // ----- Sidebar list (sorted by numeric prefix if present)
+  const withIndex = items.map(i => {
+    const src = i.posterSrc || i.images?.[0] || '';
+    const m = src.match(/(?:^|\/)(\d+)_/);
+    return { i, n: m ? parseInt(m[1], 10) : Number.MAX_SAFE_INTEGER };
+  }).sort((a,b) => a.n - b.n);
 
-        grid.innerHTML = items
-          .filter(i => i.section === 'production')
-          .map(i => {
-            const poster = i.posterSrc || (i.images?.[0] || '');
-            const media = isVideo(poster)
-              ? `<div class="card-media-wrap">
-                  <video class="card-media" muted preload="metadata" playsinline
-                          onmouseenter="this.currentTime=0; this.play()"
-                          onmouseleave="this.pause(); this.currentTime=0;">
-                    <source src="${poster}" type="video/mp4">
-                  </video>
-                </div>`
-              : `<div class="card-media-wrap">
-                  <img class="card-media" loading="lazy" alt="${i.title}" src="${poster}">
-                </div>`;
+  list.innerHTML = withIndex.map(({i}) =>
+    `<a class="asset-link" data-slug="${i.slug}" href="/project.html?slug=${encodeURIComponent(i.slug)}">${i.title || i.slug}</a>`
+  ).join('');
 
-            return `
-              <a class="card" href="/project.html?slug=${encodeURIComponent(i.slug)}" title="${i.title || i.slug}">
-                ${media}
-              </a>`;
-          }).join('');
+  // ----- Render grid (default view)
+  function renderGrid() {
+    gallery.innerHTML = `<div id="grid" class="masonry"></div>`;
+    const g = document.getElementById('grid');
 
-        // === Add preview controls ===
-        grid.querySelectorAll('video.card-media').forEach(v => {
-          // Stop after 5s
-          v.addEventListener('timeupdate', () => {
-            if (v.currentTime >= 5) v.pause();
-          }, { passive:true });
+    g.innerHTML = items
+      .filter(i => i.section === 'production')
+      .map(i => {
+        const poster = i.posterSrc || (i.images?.[0] || '');
+        const media = isVideo(poster)
+          ? `<div class="card-media-wrap">
+               <video class="card-media" muted preload="metadata" playsinline
+                       onmouseenter="this.currentTime=0; this.play()"
+                       onmouseleave="this.pause(); this.currentTime=0;">
+                 <source src="${poster}" type="video/mp4">
+               </video>
+             </div>`
+          : `<div class="card-media-wrap">
+               <img class="card-media" loading="lazy" alt="${i.title}" src="${poster}">
+             </div>`;
 
-          // Mobile: tap + hold (touchstart)
-          v.addEventListener('touchstart', () => {
-            v.currentTime = 0;
-            v.play();
-          }, { passive:true });
+        return `
+          <a class="card" data-slug="${i.slug}" href="/project.html?slug=${encodeURIComponent(i.slug)}" title="${i.title || i.slug}">
+            ${media}
+          </a>`;
+      }).join('');
 
-          // Release finger or cancel scroll → pause + reset
-          const stop = () => { v.pause(); v.currentTime = 0; };
-          v.addEventListener('touchend', stop, { passive:true });
-          v.addEventListener('touchcancel', stop, { passive:true });
-        });
+    // preview controls (hover + touch)
+    g.querySelectorAll('video.card-media').forEach(v => {
+      v.addEventListener('timeupdate', () => { if (v.currentTime >= 5) v.pause(); }, { passive:true });
+      v.addEventListener('touchstart', () => { v.currentTime = 0; v.play(); }, { passive:true });
+      const stop = () => { v.pause(); v.currentTime = 0; };
+      v.addEventListener('touchend', stop, { passive:true });
+      v.addEventListener('touchcancel', stop, { passive:true });
+    });
+  }
 
-        document.getElementById('year').textContent = new Date().getFullYear();
-      })();
-    </script>
+  // ----- Render detail view for a slug
+  function renderDetail(slug, push = true) {
+    const item = bySlug[slug];
+    if (!item) { renderGrid(); return; }
+
+    // poster first, then secondary media (dedup if poster also in videos)
+    const poster = item.posterSrc ? [item.posterSrc] : [];
+    const imgs = item.images || [];
+    const vids = (item.videos || []).filter(v => v !== item.posterSrc);
+    // Order: poster (video), then image, then any extra vids/images
+    const mediaOrder = [...poster, ...imgs, ...vids];
+
+    gallery.innerHTML = `
+      <section class="detail" data-slug="${slug}">
+        <div class="detail-header">
+          <button class="detail-back" type="button" aria-label="Back to gallery">← Back</button>
+          <div>
+            <h1 class="detail-title">${item.title || item.slug}</h1>
+            <p class="detail-meta">${[item.client,item.year].filter(Boolean).join(' · ')}</p>
+          </div>
+        </div>
+        <div class="detail-media">
+          ${mediaOrder.map(src => `
+            <div class="frame">
+              ${isVideo(src)
+                ? `<video controls preload="metadata" playsinline><source src="${src}" type="video/mp4"></video>`
+                : `<img loading="lazy" src="${src}" alt="${item.title || item.slug}">`
+              }
+            </div>
+          `).join('')}
+        </div>
+      </section>
+    `;
+
+    // Back button
+    gallery.querySelector('.detail-back').addEventListener('click', () => {
+      if (history.state && history.state.slug) history.back();
+      else renderGrid(), history.replaceState(null, '', '/');
+    });
+
+    // push URL (?slug=) so refresh/back works
+    if (push) {
+      const url = `/?slug=${encodeURIComponent(slug)}`;
+      history.pushState({ slug }, '', url);
+      document.title = `${item.title || item.slug} — Game Assets`;
+    }
+  }
+
+  // ----- Routing
+  function openFromEvent(e) {
+    const a = e.target.closest('a[data-slug]');
+    if (!a) return;
+    const slug = a.getAttribute('data-slug');
+    // SPA: don’t navigate away
+    e.preventDefault();
+    renderDetail(slug, true);
+  }
+
+  // Delegate clicks from sidebar + grid
+  document.body.addEventListener('click', openFromEvent);
+
+  // Back/forward support
+  window.addEventListener('popstate', (ev) => {
+    const slug = ev.state?.slug || new URLSearchParams(location.search).get('slug');
+    if (slug && bySlug[slug]) renderDetail(slug, /*push*/ false);
+    else { renderGrid(); document.title = 'Game Assets'; }
+  });
+
+  // Initial route
+  const initialSlug = new URLSearchParams(location.search).get('slug');
+  if (initialSlug && bySlug[initialSlug]) renderDetail(initialSlug, /*push*/ false);
+  else renderGrid();
+
+  // Footer year
+  document.getElementById('year').textContent = new Date().getFullYear();
+})();
+</script>
+
   </body>
 </html>
