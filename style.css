@@ -26,7 +26,13 @@ html, body { height:100%; margin:0; background:var(--bg); color:var(--fg); font:
 .sidebar-footer { margin-top:auto; color:var(--muted); font-size:.9rem; opacity:.8; }
 
 /* Only the grid scrolls */
-.gallery { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; flex:1; height:100vh; overflow-y:auto; }
+.gallery {
+  flex: 1;
+  height: 100vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
 .gallery::-webkit-scrollbar { width:10px; }
 .gallery::-webkit-scrollbar-thumb { background:#ccc; border-radius:10px; }
 

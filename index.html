@@ -21,142 +21,178 @@
     </main>
 
     <script>
-(async () => {
-  const res = await fetch('/manifest.json', { cache: 'no-store' });
-  const items = await res.json();
-  const bySlug = Object.fromEntries(items.map(i => [i.slug, i]));
+      (async () => {
+        const res = await fetch('/manifest.json', { cache: 'no-store' });
+        const items = await res.json();
+        const bySlug = Object.fromEntries(items.map(i => [i.slug, i]));
 
-  const list = document.getElementById('asset-list');
-  const grid = document.getElementById('grid');
-  const gallery = document.querySelector('.gallery');
+        const list = document.getElementById('asset-list');
+        const gallery = document.querySelector('.gallery');
+        const isVideo = url => /\.mp4(\?|$)/i.test(url || '');
 
-  const isVideo = url => /\.mp4(\?|$)/i.test(url || '');
+        // --- helper: draw a first-frame poster for videos with no poster ---
+        function paintFirstFrameAsPoster(v) {
+          // Skip if poster was already set (by us or the markup)
+          if (v.getAttribute('poster')) return;
 
-  // ----- Sidebar list (sorted by numeric prefix if present)
-  const withIndex = items.map(i => {
-    const src = i.posterSrc || i.images?.[0] || '';
-    const m = src.match(/(?:^|\/)(\d+)_/);
-    return { i, n: m ? parseInt(m[1], 10) : Number.MAX_SAFE_INTEGER };
-  }).sort((a,b) => a.n - b.n);
+          const seekTo = 0.2; // a tiny bit past 0 is more reliable
+          const onLoaded = () => {
+            // Some iOS builds throw if you set currentTime too early
+            try { v.currentTime = seekTo; } catch {}
+          };
+          const onSeeked = () => {
+            try {
+              const w = v.videoWidth || 1280, h = v.videoHeight || 720;
+              const canvas = document.createElement('canvas');
+              canvas.width = w; canvas.height = h;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(v, 0, 0, w, h);
+              const dataURL = canvas.toDataURL('image/jpeg', 0.75);
+              v.setAttribute('poster', dataURL);
+            } catch (err) {
+              // If CORS blocks drawing, just ignore; video will still play on touch/hover
+              // console.warn('Poster paint failed:', err);
+            } finally {
+              // Reset so hover/touch previews start from the beginning
+              try { v.currentTime = 0; } catch {}
+              v.removeEventListener('loadedmetadata', onLoaded);
+              v.removeEventListener('seeked', onSeeked);
+            }
+          };
+          v.addEventListener('loadedmetadata', onLoaded, { once: true });
+          v.addEventListener('seeked', onSeeked, { once: true });
+        }
 
-  list.innerHTML = withIndex.map(({i}) =>
-    `<a class="asset-link" data-slug="${i.slug}" href="/project.html?slug=${encodeURIComponent(i.slug)}">${i.title || i.slug}</a>`
-  ).join('');
+        // ----- Sidebar list (sorted by numeric prefix if present)
+        const withIndex = items.map(i => {
+          const src = i.posterSrc || i.images?.[0] || '';
+          const m = src.match(/(?:^|\/)(\d+)_/);
+          return { i, n: m ? parseInt(m[1], 10) : Number.MAX_SAFE_INTEGER };
+        }).sort((a,b) => a.n - b.n);
 
-  // ----- Render grid (default view)
-  function renderGrid() {
-    gallery.innerHTML = `<div id="grid" class="masonry"></div>`;
-    const g = document.getElementById('grid');
+        list.innerHTML = withIndex.map(({i}) =>
+          `<a class="asset-link" data-slug="${i.slug}" href="/project.html?slug=${encodeURIComponent(i.slug)}">${i.title || i.slug}</a>`
+        ).join('');
 
-    g.innerHTML = items
-      .filter(i => i.section === 'production')
-      .map(i => {
-        const poster = i.posterSrc || (i.images?.[0] || '');
-        const media = isVideo(poster)
-          ? `<div class="card-media-wrap">
-               <video class="card-media" muted preload="metadata" playsinline autoplay
-                       onmouseenter="this.currentTime=0; this.play()"
-                       onmouseleave="this.pause(); this.currentTime=0;">
-                 <source src="${poster}" type="video/mp4">
-               </video>
-             </div>`
-          : `<div class="card-media-wrap">
-               <img class="card-media" loading="lazy" alt="${i.title}" src="${poster}">
-             </div>`;
+        // ----- Render grid (default view)
+        function renderGrid() {
+          gallery.innerHTML = `<div id="grid" class="masonry"></div>`;
+          const g = document.getElementById('grid');
 
-        return `
-          <a class="card" data-slug="${i.slug}" href="/project.html?slug=${encodeURIComponent(i.slug)}" title="${i.title || i.slug}">
-            ${media}
-          </a>`;
-      }).join('');
+          g.innerHTML = items
+            .filter(i => i.section === 'production')
+            .map(i => {
+              const poster = i.posterSrc || (i.images?.[0] || '');
+              const media = isVideo(poster)
+                ? `<div class="card-media-wrap">
+                    <video class="card-media" muted preload="metadata" playsinline autoplay
+                            crossorigin="anonymous"
+                            onmouseenter="this.currentTime=0; this.play()"
+                            onmouseleave="this.pause(); this.currentTime=0;">
+                      <source src="${poster}" type="video/mp4">
+                    </video>
+                  </div>`
+                : `<div class="card-media-wrap">
+                    <img class="card-media" loading="lazy" alt="${i.title}" src="${poster}">
+                  </div>`;
 
-    // preview controls (hover + touch)
-    g.querySelectorAll('video.card-media').forEach(v => {
-      v.addEventListener('timeupdate', () => { if (v.currentTime >= 5) v.pause(); }, { passive:true });
-      v.addEventListener('touchstart', () => { v.currentTime = 0; v.play(); }, { passive:true });
-      const stop = () => { v.pause(); v.currentTime = 0; };
-      v.addEventListener('touchend', stop, { passive:true });
-      v.addEventListener('touchcancel', stop, { passive:true });
-    });
-  }
+              return `
+                <a class="card" data-slug="${i.slug}" href="/project.html?slug=${encodeURIComponent(i.slug)}" title="${i.title || i.slug}">
+                  ${media}
+                </a>`;
+            }).join('');
 
-  // ----- Render detail view for a slug
-  function renderDetail(slug, push = true) {
-    const item = bySlug[slug];
-    if (!item) { renderGrid(); return; }
+          // preview controls (hover + touch) + poster painting
+          g.querySelectorAll('video.card-media').forEach(v => {
+            // iOS/WebKit: paint a poster bitmap if not provided
+            paintFirstFrameAsPoster(v);
 
-    // poster first, then secondary media (dedup if poster also in videos)
-    const poster = item.posterSrc ? [item.posterSrc] : [];
-    const imgs = item.images || [];
-    const vids = (item.videos || []).filter(v => v !== item.posterSrc);
-    // Order: poster (video), then image, then any extra vids/images
-    const mediaOrder = [...poster, ...imgs, ...vids];
+            v.addEventListener('timeupdate', () => { if (v.currentTime >= 5) v.pause(); }, { passive:true });
+            v.addEventListener('touchstart', () => { v.currentTime = 0; v.play(); }, { passive:true });
+            const stop = () => { v.pause(); v.currentTime = 0; };
+            v.addEventListener('touchend', stop, { passive:true });
+            v.addEventListener('touchcancel', stop, { passive:true });
+          });
+        }
 
-    gallery.innerHTML = `
-      <section class="detail" data-slug="${slug}">
-        <div class="detail-header">
-          <button class="detail-back" type="button" aria-label="Back to gallery">← Back</button>
-          <div>
-            <h1 class="detail-title">${item.title || item.slug}</h1>
-            <p class="detail-meta">${[item.client,item.year].filter(Boolean).join(' · ')}</p>
-          </div>
-        </div>
-        <div class="detail-media">
-          ${mediaOrder.map(src => `
-            <div class="frame">
-              ${isVideo(src)
-                ? `<video controls preload="metadata" playsinline><source src="${src}" type="video/mp4"></video>`
-                : `<img loading="lazy" src="${src}" alt="${item.title || item.slug}">`
-              }
-            </div>
-          `).join('')}
-        </div>
-      </section>
-    `;
+        // ----- Render detail view for a slug
+        function renderDetail(slug, push = true) {
+          const item = bySlug[slug];
+          if (!item) { renderGrid(); return; }
 
-    // Back button
-    gallery.querySelector('.detail-back').addEventListener('click', () => {
-      if (history.state && history.state.slug) history.back();
-      else renderGrid(), history.replaceState(null, '', '/');
-    });
+          // poster first, then secondary media (dedup if poster also in videos)
+          const poster = item.posterSrc ? [item.posterSrc] : [];
+          const imgs = item.images || [];
+          const vids = (item.videos || []).filter(v => v !== item.posterSrc);
+          const mediaOrder = [...poster, ...imgs, ...vids];
 
-    // push URL (?slug=) so refresh/back works
-    if (push) {
-      const url = `/?slug=${encodeURIComponent(slug)}`;
-      history.pushState({ slug }, '', url);
-      document.title = `${item.title || item.slug} — Game Assets`;
-    }
-  }
+          gallery.innerHTML = `
+            <section class="detail" data-slug="${slug}">
+              <div class="detail-header">
+                <button class="detail-back" type="button" aria-label="Back to gallery">← Back</button>
+                <div>
+                  <h1 class="detail-title">${item.title || item.slug}</h1>
+                  <p class="detail-meta">${[item.client,item.year].filter(Boolean).join(' · ')}</p>
+                </div>
+              </div>
+              <div class="detail-media">
+                ${mediaOrder.map(src => `
+                  <div class="frame">
+                    ${isVideo(src)
+                      ? `<video controls preload="metadata" playsinline crossorigin="anonymous">
+                          <source src="${src}" type="video/mp4">
+                        </video>`
+                      : `<img loading="lazy" src="${src}" alt="${item.title || item.slug}">`
+                    }
+                  </div>
+                `).join('')}
+              </div>
+            </section>
+          `;
 
-  // ----- Routing
-  function openFromEvent(e) {
-    const a = e.target.closest('a[data-slug]');
-    if (!a) return;
-    const slug = a.getAttribute('data-slug');
-    // SPA: don’t navigate away
-    e.preventDefault();
-    renderDetail(slug, true);
-  }
+          // Back button
+          gallery.querySelector('.detail-back').addEventListener('click', () => {
+            if (history.state && history.state.slug) history.back();
+            else renderGrid(), history.replaceState(null, '', '/');
+          });
 
-  // Delegate clicks from sidebar + grid
-  document.body.addEventListener('click', openFromEvent);
+          // Paint posters for any detail videos that lack one
+          gallery.querySelectorAll('.detail video').forEach(paintFirstFrameAsPoster);
 
-  // Back/forward support
-  window.addEventListener('popstate', (ev) => {
-    const slug = ev.state?.slug || new URLSearchParams(location.search).get('slug');
-    if (slug && bySlug[slug]) renderDetail(slug, /*push*/ false);
-    else { renderGrid(); document.title = 'Game Assets'; }
-  });
+          // push URL (?slug=) so refresh/back works
+          if (push) {
+            const url = `/?slug=${encodeURIComponent(slug)}`;
+            history.pushState({ slug }, '', url);
+            document.title = `${item.title || item.slug} — Game Assets`;
+          }
+        }
 
-  // Initial route
-  const initialSlug = new URLSearchParams(location.search).get('slug');
-  if (initialSlug && bySlug[initialSlug]) renderDetail(initialSlug, /*push*/ false);
-  else renderGrid();
+        // ----- Routing
+        function openFromEvent(e) {
+          const a = e.target.closest('a[data-slug]');
+          if (!a) return;
+          const slug = a.getAttribute('data-slug');
+          e.preventDefault(); // SPA
+          renderDetail(slug, true);
+        }
 
-  // Footer year
-  document.getElementById('year').textContent = new Date().getFullYear();
-})();
-</script>
+        document.body.addEventListener('click', openFromEvent);
+
+        window.addEventListener('popstate', (ev) => {
+          const slug = ev.state?.slug || new URLSearchParams(location.search).get('slug');
+          if (slug && bySlug[slug]) renderDetail(slug, /*push*/ false);
+          else { renderGrid(); document.title = 'Game Assets'; }
+        });
+
+        // Initial route
+        const initialSlug = new URLSearchParams(location.search).get('slug');
+        if (initialSlug && bySlug[initialSlug]) renderDetail(initialSlug, /*push*/ false);
+        else renderGrid();
+
+        // Footer year
+        document.getElementById('year').textContent = new Date().getFullYear();
+      })();
+    </script>
 
   </body>
 </html>
