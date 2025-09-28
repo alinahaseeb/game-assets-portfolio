@@ -138,7 +138,7 @@
                 ${mediaOrder.map(src => `
                   <div class="frame">
                     ${isVideo(src)
-                      ? `<video controls preload="metadata" playsinline autoplay>
+                      ? `<video controls preload="metadata" playsinline>
                           <source src="${src}" type="video/mp4">
                         </video>`
                       : `<img loading="lazy" src="${src}" alt="${item.title || item.slug}">`
