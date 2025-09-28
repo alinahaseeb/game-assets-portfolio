@@ -86,7 +86,6 @@
               const media = isVideo(poster)
                 ? `<div class="card-media-wrap">
                     <video class="card-media" muted preload="metadata" playsinline autoplay
-                            crossorigin="anonymous"
                             onmouseenter="this.currentTime=0; this.play()"
                             onmouseleave="this.pause(); this.currentTime=0;">
                       <source src="${poster}" type="video/mp4">
@@ -139,7 +138,7 @@
                 ${mediaOrder.map(src => `
                   <div class="frame">
                     ${isVideo(src)
-                      ? `<video controls preload="metadata" playsinline crossorigin="anonymous">
+                      ? `<video controls preload="metadata" playsinline autoplay>
                           <source src="${src}" type="video/mp4">
                         </video>`
                       : `<img loading="lazy" src="${src}" alt="${item.title || item.slug}">`
