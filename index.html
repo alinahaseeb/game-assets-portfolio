@@ -54,7 +54,7 @@
         const poster = i.posterSrc || (i.images?.[0] || '');
         const media = isVideo(poster)
           ? `<div class="card-media-wrap">
-               <video class="card-media" muted preload="metadata" playsinline
+               <video class="card-media" muted preload="metadata" playsinline autoplay
                        onmouseenter="this.currentTime=0; this.play()"
                        onmouseleave="this.pause(); this.currentTime=0;">
                  <source src="${poster}" type="video/mp4">
