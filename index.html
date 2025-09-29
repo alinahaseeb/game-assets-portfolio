@@ -35,15 +35,17 @@
       const gallery = document.querySelector('.gallery');
       const isVideo = url => /\.mp4(\?|$)/i.test(url || '');
 
-      // iOS detection (all browsers on iOS use WebKit)
+      // --- Platform detection
       const ua = navigator.userAgent || '';
       const isIOS = /\b(iPad|iPhone|iPod)\b/i.test(ua) ||
         (/\bMacintosh\b/.test(ua) && 'ontouchend' in document);
+      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isAndroidLike = isTouch && !isIOS; // covers Android/mobile Chromium
 
-      // extract numeric prefix like "10_foo.mp4" → "10"
+      // --- Helper: extract numeric prefix from a file/url like "10_foo.mp4"
       const num = (s) => (s?.match(/(?:^|\/)(\d+)_/) || [, ''])[1] || '';
 
-      // Thumbnails you uploaded (PNG first frames)
+      // --- Thumbnails (static PNGs you uploaded)
       const THUMB_BASE = (items[0]?.posterSrc || '').replace(/\/[^\/]+$/, '');
       const THUMB_FILES = [
         "10_dragonfountain_thumbnail.png", "11_tundratrees_thumbnail.png", "12_goblinhouse_thumbnail.png",
@@ -54,7 +56,7 @@
       ];
       const THUMBS = THUMB_FILES.reduce((m, f) => { m[f.split('_')[0]] = `${THUMB_BASE}/${f}`; return m; }, {});
 
-      // Sidebar list (sorted by numeric prefix)
+      // ----- Sidebar list (sorted by numeric prefix if present)
       const withIndex = items.map(i => {
         const src = i.posterSrc || i.images?.[0] || '';
         const m = src.match(/(?:^|\/)(\d+)_/);
@@ -77,7 +79,7 @@
             const n = num(poster) || num(i.images?.[0] || '') || num(i.slug);
             const thumb = THUMBS[n] || poster;
 
-            // iOS: static image + Preview button; others: video with hover preview
+            // iOS: static image + Preview button; Desktop/Android: video element (paused)
             const media = isIOS
               ? `<div class="card-media-wrap">
                  <img class="card-media" loading="lazy" alt="${i.title}" src="${thumb}">
@@ -91,7 +93,7 @@
                  </video>
                </div>`;
 
-            // store video src on the card for iOS preview
+            // store video src for iOS preview button
             return `
             <a class="card" data-slug="${i.slug}" data-video="${poster}"
                href="/project.html?slug=${encodeURIComponent(i.slug)}" title="${i.title || i.slug}">
@@ -99,21 +101,68 @@
             </a>`;
           }).join('');
 
-        // Desktop/Android: cap hover previews at 5s
-        if (!isIOS) {
+        // Desktop hover (unchanged) + cap at 5s
+        if (!isTouch) {
           g.querySelectorAll('video.card-media').forEach(v => {
             v.addEventListener('timeupdate', () => { if (v.currentTime >= 5) v.pause(); }, { passive: true });
           });
         }
 
-        // iOS: Preview button → play 5s overlay video, then remove
+        // Android-like touch: press & hold & you can scroll — start on touchstart, stop on end/cancel, cap 5s
+        if (isAndroidLike) {
+          g.querySelectorAll('video.card-media').forEach(v => {
+            let started = false;
+            let startX = 0, startY = 0, startT = 0;
+
+            const stop = () => { v.pause(); try { v.currentTime = 0; } catch { } started = false; };
+
+            v.addEventListener('touchstart', (e) => {
+              // record gesture
+              const t = e.touches[0];
+              startX = t.clientX; startY = t.clientY; startT = Date.now();
+              // start immediately so no long-press delay
+              try { v.currentTime = 0; } catch { }
+              v.play().catch(() => { });
+              started = true;
+            }, { passive: true });
+
+            v.addEventListener('touchmove', (e) => {
+              // keep playing while scrolling; if they fling far, still okay
+              // optional: if you want to cancel after huge movement, uncomment:
+              // const t = e.touches[0]; if (Math.hypot(t.clientX-startX, t.clientY-startY) > 250) stop();
+            }, { passive: true });
+
+            v.addEventListener('touchend', (e) => {
+              // If it was a real press (held >120ms or moved >8px), cancel the upcoming click to avoid navigation
+              const dt = Date.now() - startT;
+              const t0 = (e.changedTouches && e.changedTouches[0]) || { clientX: startX, clientY: startY };
+              const moved = Math.hypot((t0.clientX - startX), (t0.clientY - startY));
+              if (started && (dt > 120 || moved > 8)) {
+                const card = v.closest('a.card');
+                if (card) {
+                  const cancelClick = (ev) => { ev.preventDefault(); ev.stopPropagation(); };
+                  card.addEventListener('click', cancelClick, { capture: true, once: true });
+                }
+              }
+              stop();
+            }, { passive: true });
+
+            v.addEventListener('touchcancel', () => stop(), { passive: true });
+
+            // cap preview to 5s
+            v.addEventListener('timeupdate', () => { if (v.currentTime >= 5) v.pause(); }, { passive: true });
+
+            // suppress long-press context menu
+            v.addEventListener('contextmenu', (e) => e.preventDefault());
+          });
+        }
+
+        // iOS: Preview button overlays a 5s video (unchanged from your last working version)
         if (isIOS) {
           g.addEventListener('click', (e) => {
             const btn = e.target.closest('.preview-btn');
             if (!btn) return;
-
-            e.preventDefault(); // don't navigate
-            e.stopPropagation();
+            e.preventDefault(); e.stopPropagation();
 
             const card = btn.closest('a.card');
             const wrap = card.querySelector('.card-media-wrap');
@@ -134,10 +183,7 @@
             v.src = src;
             if (img) v.setAttribute('poster', img.currentSrc || img.src);
 
-            // insert above the image
             wrap.appendChild(v);
-
-            // start, cap at 5s, then remove
             try { v.currentTime = 0; } catch { }
             v.play().catch(() => { });
             const stop = () => { try { v.pause(); } catch { }; v.remove(); };
@@ -148,7 +194,7 @@
         }
       }
 
-      // ------- Detail view -------
+      // ------- Detail view (unchanged) -------
       function renderDetail(slug, push = true) {
         const item = bySlug[slug];
         if (!item) { renderGrid(); return; }
@@ -198,7 +244,7 @@
       function openFromEvent(e) {
         const a = e.target.closest('a[data-slug]');
         if (!a) return;
-        // If the preview button was clicked, we already handled it.
+        // If iOS preview button is clicked, it's handled above
         if (e.target.closest('.preview-btn')) return;
         e.preventDefault();
         renderDetail(a.getAttribute('data-slug'), true);
