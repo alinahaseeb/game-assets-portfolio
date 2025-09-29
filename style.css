@@ -213,6 +213,20 @@ body {
 /* was inheriting white */
 .card {
   -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+
+.preview-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+  background: #000;
+  pointer-events: none;
+  /* don’t steal taps */
 }
 
 /* avoid link preview on long-press */
