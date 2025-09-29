@@ -307,24 +307,28 @@ body {
 
 /* detail page media sizing */
 .detail-media .frame {
-  background: #000;
+  background: transparent;
 }
 
 /* nice letterboxing */
 .detail-media video,
 .detail-media img {
+  display: block;
+  /* removes the thin line */
   width: 100%;
   height: auto;
-  max-height: 82vh;
-  /* fits within the viewport */
+  max-height: 82dvh;
+  /* keep your viewport fit */
   object-fit: contain;
   /* no cropping */
+  background: transparent;
+  /* no black behind video */
 }
 
 @media (max-width:720px) {
 
   .detail-media video,
   .detail-media img {
-    max-height: 88vh;
+    max-height: 88dvh;
   }
 }
