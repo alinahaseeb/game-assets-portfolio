@@ -3,7 +3,6 @@
     "slug": "potions",
     "section": "production",
     "title": "Potions",
-    "client": "Indie",
     "year": 2025,
     "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/1_potions1.mp4",
     "images": [
@@ -18,7 +17,6 @@
     "slug": "firepit",
     "section": "production",
     "title": "Firepit",
-    "client": "Indie",
     "year": 2025,
     "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/2_firepit1.mp4",
     "images": [
@@ -33,7 +31,6 @@
     "slug": "furnitureassets",
     "section": "production",
     "title": "Furnitureassets",
-    "client": "Indie",
     "year": 2025,
     "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/3_furnitureassets1.mp4",
     "images": [
@@ -48,7 +45,6 @@
     "slug": "oceancutout",
     "section": "production",
     "title": "Oceancutout",
-    "client": "Indie",
     "year": 2025,
     "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/4_oceancutout1.mp4",
     "images": [
@@ -63,7 +59,6 @@
     "slug": "jungletrees",
     "section": "production",
     "title": "Jungletrees",
-    "client": "Indie",
     "year": 2025,
     "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/5_jungletrees1.mp4",
     "images": [
@@ -78,7 +73,6 @@
     "slug": "orc",
     "section": "production",
     "title": "Orc",
-    "client": "Indie",
     "year": 2025,
     "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/6_orc1.mp4",
     "images": [
@@ -93,7 +87,6 @@
     "slug": "gardenassets",
     "section": "production",
     "title": "Gardenassets",
-    "client": "Indie",
     "year": 2025,
     "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/7_gardenassets1.mp4",
     "images": [
@@ -108,7 +101,6 @@
     "slug": "waterfall",
     "section": "production",
     "title": "Waterfall",
-    "client": "Indie",
     "year": 2025,
     "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/8_waterfall1.mp4",
     "images": [
@@ -123,7 +115,6 @@
     "slug": "bed",
     "section": "production",
     "title": "Bed",
-    "client": "Indie",
     "year": 2025,
     "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/9_bed1.mp4",
     "images": [
@@ -138,7 +129,6 @@
     "slug": "dragonfountain",
     "section": "production",
     "title": "Dragonfountain",
-    "client": "Indie",
     "year": 2025,
     "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/10_dragonfountain1.mp4",
     "images": [
@@ -153,7 +143,6 @@
     "slug": "tundratrees",
     "section": "production",
     "title": "Tundratrees",
-    "client": "Indie",
     "year": 2025,
     "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/11_tundratrees1.mp4",
     "images": [
@@ -168,7 +157,6 @@
     "slug": "goblinhouse",
     "section": "production",
     "title": "Goblinhouse",
-    "client": "Indie",
     "year": 2025,
     "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/12_goblinhouse1.mp4",
     "images": [
@@ -183,7 +171,6 @@
     "slug": "dock",
     "section": "production",
     "title": "Dock",
-    "client": "Indie",
     "year": 2025,
     "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/13_dock1.mp4",
     "images": [
@@ -198,7 +185,6 @@
     "slug": "room",
     "section": "production",
     "title": "Room",
-    "client": "Indie",
     "year": 2025,
     "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/14_room1.mp4",
     "images": [
@@ -213,7 +199,6 @@
     "slug": "volcano",
     "section": "production",
     "title": "Volcano",
-    "client": "Indie",
     "year": 2025,
     "posterSrc": "https://pub-0cb9a2dffa0f45cda28ab457cbb2da7d.r2.dev/15_volcano1.mp4",
     "images": [
