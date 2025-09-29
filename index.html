@@ -87,31 +87,47 @@
             const n = num(poster) || num(i.images?.[0] || '') || num(i.slug);
             const thumb = THUMBS[n];
 
-            // On iOS: static thumbnail; others: video preview
+            // iOS: static thumbnail; Desktop/Android: video element (paused until hover/touch)
             const media = (isIOS && thumb)
               ? `<div class="card-media-wrap">
-               <img class="card-media" loading="lazy" alt="${i.title}" src="${thumb}">
-             </div>`
+                 <img class="card-media" loading="lazy" alt="${i.title}" src="${thumb}">
+               </div>`
               : `<div class="card-media-wrap">
-               <video class="card-media" muted preload="metadata" playsinline
-                       onmouseenter="this.currentTime=0; this.play()"
-                       onmouseleave="this.pause(); this.currentTime=0;">
-                 <source src="${poster}" type="video/mp4">
-               </video>
-             </div>`;
+                 <video class="card-media" muted preload="metadata" playsinline
+                        onmouseenter="this.currentTime=0; this.play()"
+                        onmouseleave="this.pause(); this.currentTime=0;">
+                   <source src="${poster}" type="video/mp4">
+                 </video>
+               </div>`;
 
             return `
-          <a class="card" data-slug="${i.slug}" href="/project.html?slug=${encodeURIComponent(i.slug)}" title="${i.title || i.slug}">
-            ${media}
-          </a>`;
+            <a class="card" data-slug="${i.slug}" href="/project.html?slug=${encodeURIComponent(i.slug)}" title="${i.title || i.slug}">
+              ${media}
+            </a>`;
           }).join('');
 
-        // Hover previews only on non-iOS
+        // Desktop/Android: preview behavior
         if (!isIOS) {
           g.querySelectorAll('video.card-media').forEach(v => {
+            // cap previews at 5s
             v.addEventListener('timeupdate', () => {
               if (v.currentTime >= 5) v.pause();
             }, { passive: true });
+
+            // Android: press+hold+scroll preview (no context menu)
+            // Start on touch; do NOT preventDefault so scrolling works.
+            v.addEventListener('touchstart', () => {
+              try { v.currentTime = 0; } catch { }
+              v.play().catch(() => { });
+            }, { passive: true });
+
+            // keep playing during scroll; just make sure we stop on end/cancel
+            const stop = () => { v.pause(); try { v.currentTime = 0; } catch { } };
+            v.addEventListener('touchend', stop, { passive: true });
+            v.addEventListener('touchcancel', stop, { passive: true });
+
+            // kill long-press context menu on Android
+            v.addEventListener('contextmenu', (e) => e.preventDefault());
           });
         }
       }
@@ -127,28 +143,28 @@
         const mediaOrder = [...poster, ...imgs, ...vids];
 
         gallery.innerHTML = `
-      <section class="detail" data-slug="${slug}">
-        <div class="detail-header">
-          <button class="detail-back" type="button" aria-label="Back to gallery">← Back</button>
-          <div>
-            <h1 class="detail-title">${item.title || item.slug}</h1>
-            <p class="detail-meta">${[item.client, item.year].filter(Boolean).join(' · ')}</p>
+        <section class="detail" data-slug="${slug}">
+          <div class="detail-header">
+            <button class="detail-back" type="button" aria-label="Back to gallery">← Back</button>
+            <div>
+              <h1 class="detail-title">${item.title || item.slug}</h1>
+              <p class="detail-meta">${[item.client, item.year].filter(Boolean).join(' · ')}</p>
+            </div>
           </div>
-        </div>
-        <div class="detail-media">
-          ${mediaOrder.map(src => `
-            <div class="frame">
-              ${isVideo(src)
+          <div class="detail-media">
+            ${mediaOrder.map(src => `
+              <div class="frame">
+                ${isVideo(src)
             ? `<video controls preload="metadata" playsinline>
-                     <source src="${src}" type="video/mp4">
-                   </video>`
+                       <source src="${src}" type="video/mp4">
+                     </video>`
             : `<img loading="lazy" src="${src}" alt="${item.title || item.slug}">`
           }
-            </div>
-          `).join('')}
-        </div>
-      </section>
-    `;
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
 
         gallery.querySelector('.detail-back').addEventListener('click', () => {
           if (history.state && history.state.slug) history.back();
@@ -185,7 +201,6 @@
       document.getElementById('year').textContent = new Date().getFullYear();
     })();
   </script>
-
 </body>
 
 </html>
