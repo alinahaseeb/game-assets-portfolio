@@ -108,7 +108,7 @@ const media = (isIOS && isVideo(poster) && thumb)
 </div>`
 : isVideo(poster)
 ? `<div class="card-media-wrap">
-<video class="card-media" muted preload="metadata" playsinline autoplay
+<video class="card-media" muted preload="metadata" playsinline
 onmouseenter="this.currentTime=0; this.play()"
 onmouseleave="this.pause(); this.currentTime=0;">
 <source src="${poster}" type="video/mp4">
@@ -132,10 +132,6 @@ ${media}
 g.querySelectorAll('video.card-media').forEach(v => {
 if (!isIOS) paintFirstFrameAsPoster(v);
 v.addEventListener('timeupdate', () => { if (v.currentTime >= 5) v.pause(); }, { passive:true });
-v.addEventListener('touchstart', () => { v.currentTime = 0; v.play(); }, { passive:true });
-const stop = () => { v.pause(); v.currentTime = 0; };
-v.addEventListener('touchend', stop, { passive:true });
-v.addEventListener('touchcancel', stop, { passive:true });
 });
 
 // iOS: cards show IMG; on press & hold overlay a VIDEO that plays up to 5s
