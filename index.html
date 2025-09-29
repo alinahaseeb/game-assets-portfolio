@@ -35,39 +35,26 @@
       const gallery = document.querySelector('.gallery');
       const isVideo = url => /\.mp4(\?|$)/i.test(url || '');
 
-      // --- iOS detection (all browsers on iOS use WebKit)
+      // iOS detection (all browsers on iOS use WebKit)
       const ua = navigator.userAgent || '';
       const isIOS = /\b(iPad|iPhone|iPod)\b/i.test(ua) ||
         (/\bMacintosh\b/.test(ua) && 'ontouchend' in document);
 
-      // --- Helper: extract numeric prefix from a file/url like "10_foo.mp4"
+      // extract numeric prefix like "10_foo.mp4" → "10"
       const num = (s) => (s?.match(/(?:^|\/)(\d+)_/) || [, ''])[1] || '';
 
-      // --- Thumbnails (static PNGs you uploaded)
+      // Thumbnails you uploaded (PNG first frames)
       const THUMB_BASE = (items[0]?.posterSrc || '').replace(/\/[^\/]+$/, '');
       const THUMB_FILES = [
-        "10_dragonfountain_thumbnail.png",
-        "11_tundratrees_thumbnail.png",
-        "12_goblinhouse_thumbnail.png",
-        "13_dock_thumbnail.png",
-        "14_room_thumbnail.png",
-        "15_volcano_thumbnail.png",
-        "1_potion_thumbnail.png",
-        "2_potion_thumbnail.png",
-        "3_furnitureassets_thumbnail.png",
-        "4_oceancutout_thumbnail.png",
-        "5_jungletrees_thumbnail.png",
-        "6_orc_thumbnail.png",
-        "7_gardenassets_thumbnail.png",
-        "8_waterfall_thumbnail.png",
-        "9_bed_thumbnail.png"
+        "10_dragonfountain_thumbnail.png", "11_tundratrees_thumbnail.png", "12_goblinhouse_thumbnail.png",
+        "13_dock_thumbnail.png", "14_room_thumbnail.png", "15_volcano_thumbnail.png", "1_potion_thumbnail.png",
+        "2_potion_thumbnail.png", "3_furnitureassets_thumbnail.png", "4_oceancutout_thumbnail.png",
+        "5_jungletrees_thumbnail.png", "6_orc_thumbnail.png", "7_gardenassets_thumbnail.png",
+        "8_waterfall_thumbnail.png", "9_bed_thumbnail.png"
       ];
-      const THUMBS = THUMB_FILES.reduce((m, f) => {
-        m[f.split('_')[0]] = `${THUMB_BASE}/${f}`;
-        return m;
-      }, {});
+      const THUMBS = THUMB_FILES.reduce((m, f) => { m[f.split('_')[0]] = `${THUMB_BASE}/${f}`; return m; }, {});
 
-      // ----- Sidebar list (sorted by numeric prefix if present)
+      // Sidebar list (sorted by numeric prefix)
       const withIndex = items.map(i => {
         const src = i.posterSrc || i.images?.[0] || '';
         const m = src.match(/(?:^|\/)(\d+)_/);
@@ -78,7 +65,7 @@
         `<a class="asset-link" data-slug="${i.slug}" href="/project.html?slug=${encodeURIComponent(i.slug)}">${i.title || i.slug}</a>`
       ).join('');
 
-      // ----- Render grid (default view)
+      // ------- Grid -------
       function renderGrid() {
         gallery.innerHTML = `<div id="grid" class="masonry"></div>`;
         const g = document.getElementById('grid');
@@ -88,12 +75,13 @@
           .map(i => {
             const poster = i.posterSrc || (i.images?.[0] || '');
             const n = num(poster) || num(i.images?.[0] || '') || num(i.slug);
-            const thumb = THUMBS[n];
+            const thumb = THUMBS[n] || poster;
 
-            // iOS: static thumbnail; Desktop/Android: video element (paused until hover/touch)
-            const media = (isIOS && thumb)
+            // iOS: static image + Preview button; others: video with hover preview
+            const media = isIOS
               ? `<div class="card-media-wrap">
                  <img class="card-media" loading="lazy" alt="${i.title}" src="${thumb}">
+                 <button class="preview-btn" type="button">Preview</button>
                </div>`
               : `<div class="card-media-wrap">
                  <video class="card-media" muted preload="metadata" playsinline
@@ -103,39 +91,64 @@
                  </video>
                </div>`;
 
+            // store video src on the card for iOS preview
             return `
-            <a class="card" data-slug="${i.slug}" href="/project.html?slug=${encodeURIComponent(i.slug)}" title="${i.title || i.slug}">
+            <a class="card" data-slug="${i.slug}" data-video="${poster}"
+               href="/project.html?slug=${encodeURIComponent(i.slug)}" title="${i.title || i.slug}">
               ${media}
             </a>`;
           }).join('');
 
-        // Desktop/Android: preview behavior
+        // Desktop/Android: cap hover previews at 5s
         if (!isIOS) {
           g.querySelectorAll('video.card-media').forEach(v => {
-            // cap previews at 5s
-            v.addEventListener('timeupdate', () => {
-              if (v.currentTime >= 5) v.pause();
-            }, { passive: true });
+            v.addEventListener('timeupdate', () => { if (v.currentTime >= 5) v.pause(); }, { passive: true });
+          });
+        }
 
-            // Android: press+hold+scroll preview (no context menu)
-            // Start on touch; do NOT preventDefault so scrolling works.
-            v.addEventListener('touchstart', () => {
-              try { v.currentTime = 0; } catch { }
-              v.play().catch(() => { });
-            }, { passive: true });
+        // iOS: Preview button → play 5s overlay video, then remove
+        if (isIOS) {
+          g.addEventListener('click', (e) => {
+            const btn = e.target.closest('.preview-btn');
+            if (!btn) return;
 
-            // keep playing during scroll; just make sure we stop on end/cancel
-            const stop = () => { v.pause(); try { v.currentTime = 0; } catch { } };
-            v.addEventListener('touchend', stop, { passive: true });
-            v.addEventListener('touchcancel', stop, { passive: true });
+            e.preventDefault(); // don't navigate
+            e.stopPropagation();
 
-            // kill long-press context menu on Android
-            v.addEventListener('contextmenu', (e) => e.preventDefault());
+            const card = btn.closest('a.card');
+            const wrap = card.querySelector('.card-media-wrap');
+            const img = wrap.querySelector('img.card-media');
+            const src = card.getAttribute('data-video');
+            if (!src) return;
+
+            // remove any existing overlay on this card
+            const existing = wrap.querySelector('video.ios-preview');
+            if (existing) existing.remove();
+
+            // build overlay video
+            const v = document.createElement('video');
+            v.className = 'card-media ios-preview';
+            v.muted = true;
+            v.playsInline = true;
+            v.preload = 'metadata';
+            v.src = src;
+            if (img) v.setAttribute('poster', img.currentSrc || img.src);
+
+            // insert above the image
+            wrap.appendChild(v);
+
+            // start, cap at 5s, then remove
+            try { v.currentTime = 0; } catch { }
+            v.play().catch(() => { });
+            const stop = () => { try { v.pause(); } catch { }; v.remove(); };
+            const tm = setTimeout(stop, 5000);
+            v.addEventListener('ended', stop, { once: true });
+            v.addEventListener('timeupdate', () => { if (v.currentTime >= 5) { clearTimeout(tm); stop(); } }, { passive: true });
           });
         }
       }
 
-      // ----- Render detail view for a slug
+      // ------- Detail view -------
       function renderDetail(slug, push = true) {
         const item = bySlug[slug];
         if (!item) { renderGrid(); return; }
@@ -181,10 +194,12 @@
         }
       }
 
-      // ----- Routing
+      // ------- Routing -------
       function openFromEvent(e) {
         const a = e.target.closest('a[data-slug]');
         if (!a) return;
+        // If the preview button was clicked, we already handled it.
+        if (e.target.closest('.preview-btn')) return;
         e.preventDefault();
         renderDetail(a.getAttribute('data-slug'), true);
       }
