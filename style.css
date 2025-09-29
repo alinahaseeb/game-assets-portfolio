@@ -20,12 +20,18 @@ body {
   background: var(--bg);
   color: var(--fg);
   font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+
+  /* Fix iOS Safari toolbar cutting content */
+  height: 100dvh;
+  /* dynamic viewport height (modern browsers) */
 }
+
 
 /* Layout: fixed sidebar (25%), scrollable gallery */
 .layout {
   display: flex;
-  height: 100vh;
+  height: 100dvh;
+  /* instead of 100vh */
   overflow: hidden;
 }
 
@@ -86,7 +92,8 @@ body {
 /* Only the grid scrolls */
 .gallery {
   flex: 1;
-  height: 100vh;
+  height: 100dvh;
+  /* instead of 100vh */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
