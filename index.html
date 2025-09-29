@@ -63,7 +63,7 @@
       // --- Optional: poster painting fallback if no thumbnail exists
       function paintFirstFrameAsPoster(v) {
         if (v.getAttribute('poster')) return;
-        const seekTo = 0.2;
+        const seekTo = 0.0;
         const onLoaded = () => { try { v.currentTime = seekTo; } catch { } };
         const onSeeked = () => {
           try {
