@@ -15,17 +15,17 @@
 
 html,
 body {
-  height: 100%;
+  height: 100dvh;
+  /* keep your dvh fix */
   margin: 0;
   background: var(--bg);
   color: var(--fg);
-  font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-
-  /* Fix iOS Safari toolbar cutting content */
-  height: 100dvh;
-  /* dynamic viewport height (modern browsers) */
+  font-family: "Noto Sans KR", system-ui, -apple-system,
+    "Apple SD Gothic Neo", "Malgun Gothic",
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
 }
-
 
 /* Layout: fixed sidebar (25%), scrollable gallery */
 .layout {
@@ -75,6 +75,7 @@ body {
   opacity: .85;
   padding: .35rem .25rem;
   border-radius: .5rem;
+  font-weight: 500;
 }
 
 .asset-link:hover {
